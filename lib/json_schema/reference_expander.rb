@@ -136,7 +136,7 @@ module JsonSchema
         # exclusively for the case of a reference that needs to be
         # de-referenced again to be resolved.
         # TODO: Fix to never parse.
-        new_schema = Parser.new.parse(data, ref_schema.parent)
+        new_schema = Parser.new.parse!(data, ref_schema.parent)
         build_schema_paths(ref.uri, resolved_schema)
       else
         # insert a clone record so that the expander knows to expand it when
@@ -235,7 +235,8 @@ module JsonSchema
       return [] unless schema.original?
 
       schema_children(schema).reduce([]) do |arr, subschema|
-        if !subschema.expanded?
+        # FIXME for recursive references.
+        if !subschema.expanded? && !dereference(subschema, [])
           arr += [subschema.reference]
         else
           arr += unresolved_refs(subschema)
